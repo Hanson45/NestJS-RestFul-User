@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// para hacer una migracion 1) npx prisma migrate dev --name nombreMigracion
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int            @id @unique @default(autoincrement())
+  username        String         @unique 
+  name            String         @db.VarChar(100)
+  email           String         @unique @db.VarChar(100)
+  password        String?        @db.VarChar(100)
+  google          Boolean        @db.TinyInt  @default(false) 
+  state           Boolean        @db.TinyInt @default(true)
+  createdAt       DateTime @default(now())
+  chats           ChatParticipant[]
+  sentMessages    Message[]
+} 
+
+model Chat {
+  id            Int       @id @default(autoincrement())
+  title         String
+  createdAt     DateTime  @default(now())
+  participants  ChatParticipant[]
+  messages      Message[]
+}
+
+model ChatParticipant {
+  id            Int       @id @default(autoincrement())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        Int
+  chat          Chat      @relation(fields: [chatId], references: [id])
+  chatId        Int
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  content    String
+  createdAt  DateTime  @default(now())
+  sender     User      @relation(fields: [senderId], references: [id])
+  senderId   Int
+  chat       Chat      @relation(fields: [chatId], references: [id])
+  chatId     Int
+}
